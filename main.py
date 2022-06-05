@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        # super().__init__()
 
         # Toggle burger menu
         self.ui.btn_toggle.clicked.connect(lambda: UIFunctions.toggleMenu(self, 250, True))
@@ -43,6 +44,6 @@ if (__name__ == "__main__"):
     window = MainWindow()
 
     # API initialize
-    api = API()
+    # api = API.__init__()
 
     sys.exit(app.exec_())
