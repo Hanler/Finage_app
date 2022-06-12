@@ -1,6 +1,8 @@
 # Imports 
+from operator import countOf
 import sys
 import platform
+from traceback import print_tb
 
 # from PySide2 import QtCore, QtGui, QtWidgets
 # from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime,QUrl, Qt, QEvent)
@@ -65,6 +67,11 @@ class API():
             (currencyToGet, gotRate)
             )
 
+    def createRows(self, gui, countOfRows):
+        for _ in range(countOfRows):
+            rowPosition = gui.ui.tableWidget.rowCount()
+            gui.ui.tableWidget.insertRow(rowPosition)
+
     def fillTable(self, gui, currencyRate):
         # MainWindow.ui.tableWidget
         # ui.tableWidget.setItem(0, 0, "cellinfo")
@@ -76,11 +83,28 @@ class API():
                 cellinfo = QTableWidgetItem(str(currencyRate[column][row]))
                 gui.ui.tableWidget.setItem(row, column, cellinfo)
 
+    def greetingText(self, gui):
+        """
+        Set greeting text to label upon the time
+        """
+        actualHour = datetime.now().hour
+        if (actualHour >= 6 and actualHour < 11):
+            gui.ui.label.setText("Доброе утро")
+        elif (actualHour >= 11 and actualHour < 18):
+            gui.ui.label.setText("Добрый день")
+        elif (actualHour >= 18 and actualHour < 21):
+            gui.ui.label.setText("Добрый вечер")
+        else:
+            gui.ui.label.setText("Доброй ночи")
+
     def __init__(self, gui):
-        # cellinfo = QTableWidgetItem("item")
-        # gui.ui.tableWidget.setItem(0, 0, cellinfo)
+
         currencyRate = self.getDefaultInfo()
+        self.createRows(gui, len(currencyRate[0]))
         self.fillTable(gui, currencyRate)
+
+        self.greetingText(gui) # change the greeting text upon the time
+
 
 # Launch
 if (__name__ == "__main__"):
