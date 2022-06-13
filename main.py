@@ -1,8 +1,5 @@
 # Imports 
-from operator import countOf
 import sys
-import platform
-from traceback import print_tb
 
 # from PySide2 import QtCore, QtGui, QtWidgets
 # from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime,QUrl, Qt, QEvent)
@@ -49,11 +46,17 @@ class MainWindow(QMainWindow):
 
 class API():
     def getDate(self):
+        """
+        Returns the current date in format YY:MM:DD
+        """
         currentDate = datetime.today().strftime('%Y%m%d')
-        print(f'Date: {currentDate}')
         return(currentDate)
 
     def getDefaultInfo(self):
+        """
+        Sends the default API for the currency rate (EUR and USD)
+        """
+        # TODO: change this function to make it for all cases (not only default) 
         currencyToGet = ['USD', 'EUR']
         gotRate = []
         date = self.getDate()
@@ -68,13 +71,17 @@ class API():
             )
 
     def createRows(self, gui, countOfRows):
+        """
+        Creates as many rows in table as we need
+        """
         for _ in range(countOfRows):
             rowPosition = gui.ui.tableWidget.rowCount()
             gui.ui.tableWidget.insertRow(rowPosition)
 
     def fillTable(self, gui, currencyRate):
-        # MainWindow.ui.tableWidget
-        # ui.tableWidget.setItem(0, 0, "cellinfo")
+        """
+        Fills the table with the currency rate
+        """
         print(f'len value: {len(currencyRate[0])}')
         
         for row in range(len(currencyRate[0])):
@@ -97,7 +104,40 @@ class API():
         else:
             gui.ui.label.setText("Доброй ночи")
 
+    def getNews(self):
+        """
+        Sends API for the latest news and prepares last new (title and author) 
+        """
+        # b557749026c044cfba6f7318dcff5298
+        response = requests.get('https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=b557749026c044cfba6f7318dcff5298')
+        print(f"JSON from response: {response.json()}")
+        print(f"Part of full JSON: {response.json()['articles'][0]}")
+        theLastArticle = response.json()['articles'][0]
+        source = theLastArticle['source']['name']
+        # content = theLastArticle['content']
+        # print(f"straight content: {content}")
+        # if (content is None):
+        #     content = theLastArticle['title']
+        # if( len(content) > 40):
+        #     content = content[:280] + "..."
+        content = theLastArticle['title']
+
+        print(f"The aricle of the {source} is: {content}")
+        return(
+            (content, source)
+        )
+
+    def fillNews(self, gui, new):
+        """
+        Fill the labels for news with the prepared data
+        """
+        gui.ui.label_news.setText(new[0])
+        gui.ui.label_author.setText(new[1])
+
     def __init__(self, gui):
+
+        actualNew = self.getNews()
+        self.fillNews(gui, actualNew)
 
         currencyRate = self.getDefaultInfo()
         self.createRows(gui, len(currencyRate[0]))
