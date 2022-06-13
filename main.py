@@ -27,6 +27,11 @@ from ui_functions import *
 
 # Classes
 
+class CurrencyWindow(QMainWindow):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Choose the currency to see at the start scree")
+
 class MainWindow(QMainWindow):
     def __init__(self):
         # QMainWindow.__init__(self)
@@ -38,11 +43,18 @@ class MainWindow(QMainWindow):
         # Toggle burger menu
         self.ui.btn_toggle.clicked.connect(lambda: UIFunctions.toggleMenu(self, 250, True))
 
+        # Connect buttons and methods
+        self.ui.changeView.clicked.connect(self.createCurrencyWindow)
+
         # API initialize
         api = API(self)
 
         # Show main window
         self.show()
+    
+    def createCurrencyWindow(self):
+        self.currencyWindow = CurrencyWindow(self)
+        self.currencyWindow.show()
 
 class API():
     def getDate(self):
