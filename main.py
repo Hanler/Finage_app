@@ -1,5 +1,7 @@
 # Imports 
+from gettext import find
 import sys
+from traceback import print_tb
 
 # from PySide2 import QtCore, QtGui, QtWidgets
 # from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime,QUrl, Qt, QEvent)
@@ -17,6 +19,7 @@ from datetime import datetime
 
 # Link GUI file
 from design import Ui_MainWindow
+from design_2 import Ui_CurrencyWindow
 
 # Import functions
 from ui_functions import *
@@ -30,7 +33,65 @@ from ui_functions import *
 class CurrencyWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Choose the currency to see at the start scree")
+        self.ui = Ui_CurrencyWindow()
+        self.ui.setupUi(self)
+        self.ui.currency_search.setPlaceholderText("Введите аббревиатуру валюты") # ?
+        
+        self.currency = ("AUD", "AZN", "BYN", "BGN", "KRW", "HKD", "DKK", "USD", "EUR", "EGP", "JPY", "PLN", "INR", "CAD", "HRK", "MXN", "MDL", "ILS", "NZD", "NOK", "ZAR", "RUB", "RON", "IDR", "SGD", "XDR", "KZT", "TRY", "HUF", "GBP", "CZK", "SEK", "CHF", "CNY")
+
+        self.addCheckBoxes(self.currency)
+
+        self.ui.currency_search.textChanged.connect(self.search)
+        # self.search()
+
+    def addCheckBoxes(self, arrCurrancy):
+        """
+        Initial adding of checkboxes
+        """
+        for i in range(len(arrCurrancy)):
+            self.checkBox = QtWidgets.QCheckBox(self.ui.scrollAreaWidgetContents)
+            font = QtGui.QFont()
+            font.setFamily("Magistral Book")
+            self.checkBox.setFont(font)
+            self.checkBox.setObjectName(f"checkBox{i}")
+            self.ui.verticalLayout_2.addWidget(self.checkBox)
+            self.checkBox.setText(self.currency[i])
+
+        # self.ui.checkBox.hide()
+        self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QCheckBox, "checkBox1").hide()
+
+    def hideCheckboxes(self):
+        """
+        Hides all checkboxes in scrollAreaWidgetContents
+        """
+        amountOfChildElems = len( self.ui.scrollAreaWidgetContents.children() )
+        for i in range(amountOfChildElems - 1):
+            elemToHide = self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QCheckBox, f"checkBox{i}")
+            elemToHide.hide()
+
+    def showCheckboxes(self, arrCurrancy):
+        """
+        Shows checkboxes from the argument array
+        """
+        for i in arrCurrancy:
+            numberOfCheckbox = self.currency.index(i)
+            self.ui.scrollAreaWidgetContents.findChild(QtWidgets.QCheckBox, f"checkBox{numberOfCheckbox}").show()
+
+    def search(self):
+        """
+        Searches the abbreviation of currencies upon the request from the input
+        """
+        txt = self.ui.currency_search.toPlainText()
+        txtUpperNorm = txt.upper().replace(' ', '')
+        
+        resultOfSearch = []
+        for abbr in self.currency:
+            print(f"The result of searching {txtUpperNorm} in {abbr}: {abbr.find(txtUpperNorm)}")
+            if (abbr.find(txtUpperNorm) == 0):
+                resultOfSearch.append(abbr)
+
+        self.hideCheckboxes()
+        self.showCheckboxes(resultOfSearch)
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -77,7 +138,6 @@ class API():
             BASE_URL = f'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode={currency}&date={date}&json'
             response = requests.get(f"{BASE_URL}")
             gotRate.append(response.json()[0]['rate'])
-        print(f"gotRate: {gotRate}")
         return(
             (currencyToGet, gotRate)
             )
@@ -147,13 +207,18 @@ class API():
         gui.ui.label_author.setText(new[1])
 
     def __init__(self, gui):
+        try:
+            actualNew = self.getNews()
+            self.fillNews(gui, actualNew)
+        except:
+            pass # TODO implement the button to retry sending API for news
 
-        actualNew = self.getNews()
-        self.fillNews(gui, actualNew)
-
-        currencyRate = self.getDefaultInfo()
-        self.createRows(gui, len(currencyRate[0]))
-        self.fillTable(gui, currencyRate)
+        try: 
+            currencyRate = self.getDefaultInfo()
+            self.createRows(gui, len(currencyRate[0]))
+            self.fillTable(gui, currencyRate)
+        except:
+            pass # TODO implement the button to retry sending API for currency rate
 
         self.greetingText(gui) # change the greeting text upon the time
 
