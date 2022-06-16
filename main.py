@@ -1,7 +1,5 @@
 # Imports 
-from gettext import find
 import sys
-from traceback import print_tb
 
 # from PySide2 import QtCore, QtGui, QtWidgets
 # from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime,QUrl, Qt, QEvent)
@@ -125,12 +123,11 @@ class API():
         currentDate = datetime.today().strftime('%Y%m%d')
         return(currentDate)
 
-    def getDefaultInfo(self):
+    def getCurrencyRate(self, currencyToGet=['USD', 'EUR']):
         """
         Sends the default API for the currency rate (EUR and USD)
         """
-        # TODO: change this function to make it for all cases (not only default) 
-        currencyToGet = ['USD', 'EUR']
+        # currencyToGet = ['USD', 'EUR']
         gotRate = []
         date = self.getDate()
         for currency in currencyToGet:
@@ -214,7 +211,7 @@ class API():
             pass # TODO implement the button to retry sending API for news
 
         try: 
-            currencyRate = self.getDefaultInfo()
+            currencyRate = self.getCurrencyRate() # default [EUR and USD] without arguement
             self.createRows(gui, len(currencyRate[0]))
             self.fillTable(gui, currencyRate)
         except:
